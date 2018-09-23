@@ -1,5 +1,25 @@
 import numpy as np
-from model.galaxy import Galaxy
+
+
+class Star:
+    def __init__(self, pos=np.random.random(3), vel=np.random.random(3), acc=np.zeros(3), mass=float(np.random.random(1))):
+        # WARNING: the above initialization seems to yield the same value every time
+        self.pos = pos
+        self.vel = vel
+        self.acc = acc
+        self.mass = mass
+
+    def __str__(self):
+        return str(list(self.pos)+list(self.vel)+list(self.acc)+list([self.mass]))
+
+
+class Galaxy:
+    def __init__(self, n_stars=100):
+        self.n_stars = n_stars
+        self.stars = np.empty(n_stars, dtype=object)
+
+        for idx in range(n_stars):
+            self.stars[idx] = Star(pos=np.random.random(3), vel=np.random.random(3), acc=np.zeros(3), mass=float(np.random.random(1)))
 
 
 class Universe:
@@ -20,19 +40,4 @@ class Universe:
             self.n_stars = len(self.stars)
         else:
             self.stars = Galaxy(n_stars).stars
-
-    # def get_velocities(self):
-    #     velocities = np.empty((3, self.n_stars))
-    #     for idx in range(self.n_stars):
-    #         velocities[idx] = self.stars[idx].vel
-    #
-    # def get_positions(self):
-    #     positions = np.empty((3, self.n_stars))
-    #     for idx in range(self.n_stars):
-    #         positions[idx] = self.stars[idx].pos
-    #
-    # def get_accelerations(self):
-    #     accelerations = np.empty((3, self.n_stars))
-    #     for idx in range(self.n_stars):
-    #         accelerations[idx] = self.stars[idx].acc
 
