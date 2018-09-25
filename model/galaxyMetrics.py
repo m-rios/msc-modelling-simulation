@@ -1,7 +1,7 @@
 import universe
+import constants 
 import math
 from datetime import datetime
-from threading import Timer
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
@@ -9,11 +9,10 @@ import matplotlib.font_manager as fm
 
 class Judger:
 	"""docstring for Judger"""
-	self.lastEnergySum = 0
-	self.lastMomentumSum = [0,0,0]
-	self.energySums = []
+	
+	self.kineticEnergySums = []
 	self.momentumSums = []
-	self.t = None
+	self.potentialEnergySum = []
 	def __init__(self, judgedUniverse=None, judgedGalaxy=None):
 		super(Judger, self).__init__()
 		self.judgedUniverse=judgedUniverse
@@ -29,30 +28,26 @@ class Judger:
 			
 
 
-	def compareGalaxyByTimeSlot(self, slot=0.5, galaxy=None):
-		galaxyEnergySum = 0
+	def metricsGalaxy(self, galaxy=None):
+		galaxykineticEnergySum = 0
 		galaxyMomentumSum = [0,0,0]
+		galaxyPotentialEnergy = 0
 		for star in galaxy:
-			galaxyEnergySum += star.mass * (star.vel[0]**2 + star.vel[1]**2+star.vel[2]**2)
+			galaxykineticEnergySum += ((star.mass ** 2) * (star.vel[0]**2 + star.vel[1]**2+star.vel[2]**2)) / (2 * star.mass)
 			galaxyMomentumSum += (star.mass * star.vel[0], star.mass * star.vel[1], star.mass * star.vel[2])
 
-		self.energySums.append(galaxyEnergySum)
+		for i in range(0, galaxy.n_stars):
+			for  j in xrange(0, galaxy.n_stars):
+				star1 = galaxy.stars[i]
+				star2 = galaxy.stars[j]
+				galaxyPotentialEnergy -= (constants.G * star1.mass * star2.mass)/(((star1.vel[0] - star2.vel[0]) ** 2 + (star1.vel[1] - star2.vel[1]) ** 2 + (star1.vel[2] - star2.vel[2]) ** 2) ** (1.0/2.0))
+
+		self.kineticEnergySums.append(galaxyEnergySum)
 		self.momentumSums.append(galaxyMomentumSum)
+		self.galaxyPotentialEnergy.append(galaxyPotentialEnergy)
 
-		if self.lastEnergySum != galaxyEnergySum:
-			if self.lastEnergySum != 0:
-				print ("error in metrics---kinect energy")
-		if self.lastMomentumSum != galaxyMomentumSum:
-			if self.lastMomentumSum[0] != 0 & self.lastMomentumSum[1] != 0 & self.lastMomentumSum[2] != 0:
-				print ("error in metrics---momentum")
-
-		self.lastEnergySum = galaxyEnergySum
-		self.lastMomentumSum = galaxyMomentumSum
 		plt.figure(figsize=(8, 6), dpi=80)
 		plt.ion()
-
-		self.t = Timer(slot, compareGalaxyByTimeSlot, (slot,galaxy,))
-		self.t.start()
 
 	def stopMetrics(self):
 		self.t.cancel()
