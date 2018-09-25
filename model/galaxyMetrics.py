@@ -2,11 +2,16 @@ import universe
 import math
 from datetime import datetime
 from threading import Timer
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 
 class Judger:
 	"""docstring for Judger"""
 	self.lastEnergySum = 0
 	self.lastMomentumSum = [0,0,0]
+	self.energySums = []
+	self.momentumSums = []
 	self.t = None
 	def __init__(self, judgedUniverse=None, judgedGalaxy=None):
 		super(Judger, self).__init__()
