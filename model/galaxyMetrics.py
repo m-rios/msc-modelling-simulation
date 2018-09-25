@@ -10,13 +10,14 @@ import matplotlib.font_manager as fm
 class Judger:
 	"""docstring for Judger"""
 	
-	self.kineticEnergySums = []
-	self.momentumSums = []
-	self.potentialEnergySum = []
+	
 	def __init__(self, judgedUniverse=None, judgedGalaxy=None):
 		super(Judger, self).__init__()
 		self.judgedUniverse=judgedUniverse
 		self.judgedGalaxy = judgedGalaxy
+		self.kineticEnergySums = []
+		self.momentumSums = []
+		self.potentialEnergySum = []
 
 	def startJudging(self):
 		if self.judgedUniverse != None:
