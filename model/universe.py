@@ -14,7 +14,7 @@ class Star:
 
 
 class Galaxy:
-    def __init__(self, n_stars=100, name=galaxy1):
+    def __init__(self, n_stars=100, name="galaxy1"):
         self.n_stars = n_stars
         self.stars = np.empty(n_stars, dtype=object)
         self.name = name

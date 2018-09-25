@@ -5,6 +5,7 @@ from threading import Timer
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
+#envtrul
 
 class Judger:
 	"""docstring for Judger"""
@@ -35,16 +36,20 @@ class Judger:
 			galaxyEnergySum += star.mass * (star.vel[0]**2 + star.vel[1]**2+star.vel[2]**2)
 			galaxyMomentumSum += (star.mass * star.vel[0], star.mass * star.vel[1], star.mass * star.vel[2])
 
-		
+		self.energySums.append(galaxyEnergySum)
+		self.momentumSums.append(galaxyMomentumSum)
+
 		if self.lastEnergySum != galaxyEnergySum:
 			if self.lastEnergySum != 0:
-				print "error in metrics---kinect energy"
+				print ("error in metrics---kinect energy")
 		if self.lastMomentumSum != galaxyMomentumSum:
 			if self.lastMomentumSum[0] != 0 & self.lastMomentumSum[1] != 0 & self.lastMomentumSum[2] != 0:
-				print "error in metrics---momentum"
+				print ("error in metrics---momentum")
 
 		self.lastEnergySum = galaxyEnergySum
-		self.lastMomentumSum = galaxyMomentumSum;
+		self.lastMomentumSum = galaxyMomentumSum
+		plt.figure(figsize=(8, 6), dpi=80)
+		plt.ion()
 
 		self.t = Timer(slot, compareGalaxyByTimeSlot, (slot,galaxy,))
 		self.t.start()
