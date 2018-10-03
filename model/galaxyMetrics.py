@@ -49,9 +49,3 @@ class Judger:
 
 		plt.figure(figsize=(8, 6), dpi=80)
 		plt.ion()
-
-	def stopMetrics(self):
-		self.t.cancel()
-
-		
-
