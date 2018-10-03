@@ -42,3 +42,18 @@ class Euler(Integrator):
             uni.stars[i].acc = n_acc
             uni.stars[i].vel = n_vel
             uni.stars[i].pos = n_pos
+
+class leapfrot(Integrator):
+    def __init__(self, dt:float=1e-5):
+        super().__init__(dt)
+    
+    def do_step(self, uni: Universe):
+        for star in calculatedUniverse.n_stars:
+            starhalfstep = star.pos + (timeStep * star.vel) / 2 # 
+            star.pos = starhalfstep
+        for star in calculatedUniverse.n_stars:
+            star.acc = calculatedUniverse.getAccelerationOnStar(star) # new acceleration
+        
+        for star in calculatedUniverse.n_stars:
+            star.vel = star.vel + timeStep * star.acc #get new vel
+            star.pos = star.pos + timeStep * star.vel / 2

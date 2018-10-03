@@ -41,4 +41,8 @@ class Universe:
             self.n_stars = len(self.stars)
         else:
             self.stars = Galaxy(n_stars).stars
+        
+    def getAccelerationOnStar(star1:Star):
+        #TODO: Need use the newton's law to calculate the force on this star1
+        return np.random.random(3)
 

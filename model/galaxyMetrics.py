@@ -18,6 +18,7 @@ class Judger:
 		self.kineticEnergySums = []
 		self.momentumSums = []
 		self.potentialEnergySum = []
+		self.galaxyPotentialEnergy = []
 
 	def startJudging(self):
 		if self.judgedUniverse != None:
@@ -49,9 +50,5 @@ class Judger:
 
 		plt.figure(figsize=(8, 6), dpi=80)
 		plt.ion()
-
-	def stopMetrics(self):
-		self.t.cancel()
-
 		
 
