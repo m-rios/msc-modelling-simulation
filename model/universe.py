@@ -10,7 +10,8 @@ class Star:
         self.mass = mass
 
     def __str__(self):
-        return str(list(self.pos)+list(self.vel)+list(self.acc)+list([self.mass]))
+        superlist = list(self.pos)+list(self.vel)+list(self.acc)+list([self.mass])
+        return ','.join(map(str, superlist))
 
 
 class Galaxy:
@@ -20,7 +21,38 @@ class Galaxy:
         self.name = name
 
         for idx in range(n_stars):
-            self.stars[idx] = Star(pos=np.random.random(3), vel=np.random.random(3), acc=np.zeros(3), mass=float(np.random.random(1)))
+            self.stars[idx] = Star(pos=np.random.random(3), vel=np.random.random(3), acc=np.zeros(3), mass=float(np.random.random(1)*100))
+
+    def __len__(self):
+        return len(self.stars)
+
+    def __iter__(self):
+        self.idx = 0
+        return self
+
+    def __next__(self):
+        if self.idx < len(self.stars):
+            star = self.stars[self.idx]
+            self.idx += 1
+            return star
+        else:
+            raise StopIteration
+
+    def __str__(self):
+        return ';'.join(str(s) for s in self)
+
+    def __add__(self, other):
+        assert isinstance(other, Galaxy)
+        g3 = Galaxy(n_stars=0)
+        g3.stars = np.concatenate((self.stars, other.stars))
+        g3.__n_stars = len(g3.stars)
+        return g3
+
+    def __getitem__(self, item):
+        return self.stars[item]
+
+    def __delitem__(self, idx):
+        self.stars = np.delete(self.stars, idx)
 
 
 class Universe:
@@ -33,16 +65,18 @@ class Universe:
         :param galaxy2: Object of type Galaxy
         """
 
-        self.n_stars = n_stars
-        self.stars = None # List of star objects
         if galaxy1 is not None and galaxy2 is not None:
             assert isinstance(galaxy1, Galaxy) and isinstance(galaxy2, Galaxy)
-            self.stars = np.concatenate((galaxy1.stars, galaxy2.stars))
-            self.n_stars = len(self.stars)
+            self.galaxy = galaxy1 + galaxy2
         else:
             self.stars = Galaxy(n_stars).stars
+            self.galaxy = Galaxy(n_stars)
         
     def getAccelerationOnStar(star1:Star):
         #TODO: Need use the newton's law to calculate the force on this star1
         return np.random.random(3)
 
+if __name__ == '__main__':
+    g = Galaxy()
+    a = g[1]
+    del g[1]
