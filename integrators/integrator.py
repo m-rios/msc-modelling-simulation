@@ -64,7 +64,7 @@ class Leapfrog(Integrator):
         
         for i in range(len(uni.galaxy)):
             n_acc = 0
-            i_star = galaxy[i]
+            i_star = uni.galaxy[i]
             attracting_stars = self.selector.select(i, uni).galaxy
             for j_star in attracting_stars:
                 d = i_star.pos - j_star.pos
@@ -78,6 +78,64 @@ class Leapfrog(Integrator):
             star.vel = star.vel + timeStep * star.acc #get new vel
             star.pos = star.pos + timeStep * star.vel / 2    
 
+class Hermite(Integrator):
+    def __init__(self, dt:float=1e-5, selector:sel.Selector=sel.AllSelector):
+        super().__init__(dt)
+    
+    def do_step(self, uni:Universe):
+
+        shadowGalaxy = []
+        shadowUniverse = Universe()
+        shadowUniverse.galaxy = shadowGalaxy
+
+        for i in range(len(uni.galaxy)): #calculate prediction velo and posiiton
+
+            star = uni.galaxy[i]
+            starJ = self.calculateJ(uni.galaxy)
+            shadowStar = star()
+            predicatPos = star.pos + star.vel * dt + star.vel * pow(dt, 2) / 2 + starJ * pow(dt, 3) / 6
+            predicatVel = star.vel + star.acc * dt + starJ * pow(dt, 2) / 2
+            shadowStar.pos = predicatPos
+            shadowStar.vel = predicatVel
+            shadowGalaxy.append(shadowStar)
+        
+
+        for i in range(len(shadowUniverse.galaxy)): #calculate prediction acceleration
+
+            i_star = shadowUniverse.galaxy[i]
+            predicateAcc = 0
+
+            attracting_stars = self.selector.select(i, shadowUniverse).galaxy
+            for j_star in attracting_stars:
+                d = i_star.pos - j_star.pos
+                predicateAcc += cst.G * j_star.mass * d/norm(d)
+            
+            i_star.acc = predicateAcc
+        
+        for i in range(len(uni.galaxy)):
+            i_star = uni.galaxy[i]
+            i_star_jerk = self.calculateJ(uni.galaxy, i)
+            
+            i_shadowStar = shadowGalaxy[i]
+            i_shadowStar_jerk = self.calculateJ(shadowGalaxy, i)
+
+
+            i_star_v1 = i_star.vel + (i_star.acc + i_shadowStar.acc) * dt / 2 + (i_star_jerk - i_shadowStar_jerk) * pow(dt, 2) / 12
+            i_star.pos = i_star.pos + (i_star.vel + i_star_v1) * dt / 2 + (i_star.acc - i_shadowStar.acc) * pow(dt, 2) / 12
+            i_star.vel = i_star_v1
+
+    
+    def calculateJ(galaxy:Galaxy, i:int=1):
+
+        i_star = galaxy[i]
+        jerk = 0
+        attracting_stars = self.selector.select(i, uni).galaxy
+        for j_star in attracting_stars:
+            d = i_star.pos - j_star.pos
+            relativeV = i_star.vel - j_star.vel
+            jerk += cst.G * j_star.mass * (relativeV/pow(norm(relativeV,3)) - 3 * (d * relativeV) * d / pow(norm(d), 5))
+        
+        return jerk
 
 class SimRun:
     def __init__(self, n_steps: int = 10**10, n_stars: int = 10, universe: Universe = None, integrator: Integrator = Euler(), name: str = ""):
