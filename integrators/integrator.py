@@ -16,7 +16,6 @@ class Integrator(ABC):
     # Abstract integrator class. All integrator methods must extend this class
 
     def __init__(self, dt: float = 1e-5, selector: sel.Selector = sel.AllSelector()):
-        pass
         assert isinstance(selector, sel.Selector) and isinstance(dt, float)
         self.dt = dt
         self.selector = selector
@@ -53,29 +52,31 @@ class Euler(Integrator):
 
 
 
-class leapfrot(Integrator):
+class Leapfrog(Integrator):
     def __init__(self, dt:float=1e-5, selector: sel.Selector = sel.AllSelector()):
         super().__init__(dt)
-    
-    def do_step(self, galaxy: Galaxy):
-        for star in galaxy.stars:
-            starhalfstep = star.pos + (timeStep * star.vel) / 2 # 
+
+    def do_step( self, uni: Universe):
+        for i in range(len(uni.galaxy)):
+            star = uni.galaxy[i]
+            starhalfstep = star.pos + (timeStep * star.vel) / 2
             star.pos = starhalfstep
         
-        for i in range(len(galaxy)):
+        for i in range(len(uni.galaxy)):
             n_acc = 0
             i_star = galaxy[i]
-            for j in range(len(galaxy)):
-                j_star = galaxy[j]
-                if i != j:
-                    d = i_star.pos - j_star.pos
-                    n_acc += cst.G * j_star.mass * d/norm(d)
+            attracting_stars = self.selector.select(i, uni).galaxy
+            for j_star in attracting_stars:
+                d = i_star.pos - j_star.pos
+                n_acc += cst.G * j_star.mass * d/norm(d)
             
             i_star.acc = n_acc
         
-        for star in galaxy.stars:
+
+        for i in range(len(uni.galaxy)):
+            star = uni.galaxy[i]
             star.vel = star.vel + timeStep * star.acc #get new vel
-            star.pos = star.pos + timeStep * star.vel / 2
+            star.pos = star.pos + timeStep * star.vel / 2    
 
 
 class SimRun:
