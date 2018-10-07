@@ -1,15 +1,12 @@
 import matplotlib.pyplot as plt
-import numpy as np
 from mpl_toolkits.mplot3d import Axes3D # Don't remove, needed for the 3d plot
 from matplotlib.animation import FuncAnimation
-from integrators.integrator import SimRun
+from simulation import SimRun, Player, Simulator
 
 
 class MainWindow():
     def __init__(self):
-        self.sim = SimRun()
-        self.sim.integrator.dt = 0.001
-
+        self.sim: Simulator = None
         # Configure plotting
         plt.switch_backend('Qt5Agg')
         self.fig = plt.figure()
@@ -20,10 +17,8 @@ class MainWindow():
         # Universe viewport configuration
         self.ax1._axes.set_aspect('equal')
         self.ax1.set_facecolor((24/255, 24/255, 24/255))
-        # ax1.grid(False)
         self.ax1.axis('off')
         self.ax1.set_title("Universe viewport", y=1.085)
-        self.scat = self.ax1.scatter(self.sim.xs(), self.sim.ys(), self.sim.zs(), c='y')
 
         # Hamiltonian viewport configuration
         self.ax2.set_title("Hamiltonian")
@@ -31,21 +26,33 @@ class MainWindow():
         # Angular momentum viewport configuration
         self.ax3.set_title("Total angular momentum")
 
-
-        # Setup animation
-        self.anim = FuncAnimation(self.fig, self.update, interval=1)
-
         # Start plot maximized
         mng = plt.get_current_fig_manager()
         mng.window.showMaximized()
-        plt.show()
 
-    def update(self, frame_n):
+    def __update(self, frame_n):
         self.ax1.title.set_text("Universe viewport epoch {}".format(frame_n))
         self.sim.run_step()
         self.scat._offsets3d = self.sim.get_pos()
 
-    def plot_metrics(self):
-        pass
+    def simulate(self, n_steps=100, n_stars=10):
+        self.sim = SimRun(n_steps=n_steps, n_stars=n_stars)
+        xs, ys, zs = self.sim.get_pos()
+        self.scat = self.ax1.scatter(xs, ys, zs, c='y')
 
+        # Setup animation
+        anim = FuncAnimation(self.fig, self.__update, interval=1)
+        plt.show()
+
+    def __update2(self, frame_n):
+        self.ax1.title.set_text("Universe viewport epoch {}".format(frame_n))
+        self.scat._offsets3d = self.sim.run_step()
+
+    def replay(self, path):
+        self.sim = Player(path)
+        xs, ys, zs = self.sim.run_step()
+        self.scat = self.ax1.scatter(xs, ys, zs, c='y')
+        # Setup animation
+        anim = FuncAnimation(self.fig, self.__update2, interval=50)
+        plt.show()
 
