@@ -9,11 +9,11 @@ class Universe:
                                               ('acc2', (np.float64, 3)),
                                               ('acc3', (np.float64, 3)),
                                               ('mass', np.float64)])
-        for star in self.stars:
-            star['pos'] = np.random.randn(3)
-            star['vel'] = np.random.randn(3)
-            star['acc'] = np.random.rand(3)
-            star['mass'] = np.random.rand()*10000
+        self.stars['pos'] = np.random.randn(n_stars, 3)
+        # self.stars['pos'][:, 2] = 1
+        self.stars['vel'] = np.random.randn(n_stars, 3)
+        self.stars['acc'] = np.random.rand(n_stars, 3)
+        self.stars['mass'] = np.random.rand(n_stars)*1e10
 
     def __len__(self):
         return len(self.stars)

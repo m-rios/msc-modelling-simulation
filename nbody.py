@@ -7,9 +7,13 @@ def run_default_simulation(n_steps, n_stars):
     run = SimRun(n_steps=n_steps, n_stars=n_stars)
     run.run()
 
+def run_replay(path):
+    w = MainWindow()
+    w.replay(path)
 
 def run_default_gui(n_stars):
-    MainWindow(n_stars)
+    w = MainWindow()
+    w.simulate(n_stars=n_stars)
 
 
 if __name__ == '__main__':
@@ -22,7 +26,7 @@ if __name__ == '__main__':
     if args.batch is not None:
         run_default_simulation(int(args.batch), int(args.s))
     elif args.replay is not None:
-        pass
+        run_replay(args.replay)
     else:
         run_default_gui(int(args.s))
 

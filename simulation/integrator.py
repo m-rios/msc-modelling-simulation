@@ -8,7 +8,7 @@ import numpy as np
 class Integrator(ABC):
     # Abstract integrator class. All integrator methods must extend this class
 
-    def __init__(self, dt: float = 0.001, selector: sel.Selector = sel.AllSelector()):
+    def __init__(self, dt: float = 1e-3, selector: sel.Selector = sel.AllSelector()):
         assert isinstance(selector, sel.Selector) and isinstance(dt, float)
         self.dt = dt
         self.selector = selector
