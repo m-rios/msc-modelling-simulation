@@ -55,9 +55,9 @@ class MainWindow():
 
     def simulate(self, n_steps=100, n_stars=10, integrator='euler'):
         if integrator == 'leapfrog':
-            self.sim = SimRun(n_step=n_steps, n_stars=n_stars, Integrator=Leapfrog())
+            self.sim = SimRun(n_steps=n_steps, n_stars=n_stars, integrator=Leapfrog())
         elif integrator == 'hermite':
-            self.sim = SimRun(n_step=n_steps, n_stars=n_stars, Integrator=Hermite())
+            self.sim = SimRun(n_steps=n_steps, n_stars=n_stars, integrator=Hermite())
         else:
             self.sim = SimRun(n_steps=n_steps, n_stars=n_stars)
         

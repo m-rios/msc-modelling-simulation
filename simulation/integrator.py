@@ -53,10 +53,10 @@ class Leapfrog(Integrator):
         assert isinstance(uni, Universe)
         for i in range(len(uni)):
             star = uni.stars[i]
-            starhalfstep = star['pos'] + (timeStep * star['vel']) / 2
+            starhalfstep = star['pos'] + (self.dt * star['vel']) / 2
             star['pos'] = starhalfstep
         
-        for i in range(len(uni.galaxy)):
+        for i in range(len(uni)):
             n_acc = 0
             i_star = uni.stars[i]
             attracting_stars = uni[self.selector.select(i, uni)]
@@ -64,13 +64,13 @@ class Leapfrog(Integrator):
                 d = i_star['pos'] - j_star['pos']
                 n_acc += cst.G * j_star['mass'] * d/norm(d)
             
-            i_star.acc = n_acc
+            i_star['acc'] = n_acc
         
 
         for i in range(len(uni)):
             star = uni.stars[i]
-            star['vel'] = star['vel'] + timeStep * star['acc'] #get new vel
-            star['pos'] = star['pos'] + timeStep * star['vel'] / 2
+            star['vel'] = star['vel'] + self.dt * star['acc'] #get new vel
+            star['pos'] = star['pos'] + self.dt * star['vel'] / 2
     
 
 class Hermite(Integrator):
