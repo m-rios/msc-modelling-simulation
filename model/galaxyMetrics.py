@@ -9,47 +9,43 @@ import numpy as np
 from numpy.linalg import norm
 #envtrul
 
-class Judger:
-	"""docstring for Judger"""
-	def __init__(self, judgedUniverse: Universe=None):
-		super(Judger, self).__init__()
-		self.judgedUniverse=judgedUniverse
-		self.hamiltionians = []
-		self.angularMomentums = []
-		
+class Jugde:
+    def __init__(self):
+        self.hamiltonians = []
+        self.angular_momentums = []
 
-	def judge(self):
-		# print('start!')
-		angularMomentumSum = 0
-		potentilEnergySum = 0
-		kineticEnergySum = 0
-		for i in range(len(self.judgedUniverse.stars)):
-			currentStart = self.judgedUniverse.stars[i]
-			pos = currentStart['pos']
-			mass = currentStart['mass']
-			vel = currentStart['vel']
-			kineticEnergy = pow(norm(vel),2)/(2 * mass) 
-			kineticEnergySum += kineticEnergy
+    def judge(self, u: Universe):
+        # print('start!')
+        angular_momentum_sum = 0
+        potential_energy_sum = 0
+        kinetic_energy_sum = 0
+        for i in range(len(u)):
+            current_star = u[i]
+            pos = current_star['pos']
+            mass = current_star['mass']
+            vel = current_star['vel']
+            kinetic_energy = pow(norm(vel),2)/(2 * mass)
+            kinetic_energy_sum += kinetic_energy
 
-			momentum = mass * vel
-			angularMomentum = np.dot(momentum, pos)
-			angularMomentumSum += angularMomentum
+            momentum = mass * vel
+            angular_momentum = np.linalg.norm(np.cross(pos, momentum))
+            angular_momentum_sum += angular_momentum
 
-			for j in range(len(self.judgedUniverse.stars)):
-				jStar = self.judgedUniverse.stars[j]
-				jPos = jStar['pos']
-				jMass = jStar['mass']
+            for j in range(len(u)):
+                jStar = u[j]
+                jPos = jStar['pos']
+                jMass = jStar['mass']
 
-				if i != j:
-					U = constants.G * mass * jMass / norm(pos - jPos)
-					potentilEnergySum += U
-		
-		H = kineticEnergySum + potentilEnergySum
-		
-		self.hamiltionians.append(H)
-		self.angularMomentums.append(angularMomentumSum)
-		return {'hanmiltonian' : self.hamiltionians, 'angularMomentum' : self.angularMomentums}
-		
-	
-		
+                if i != j:
+                    U = constants.G * mass * jMass / norm(pos - jPos)
+                    potential_energy_sum += U
+
+        H = kinetic_energy_sum + potential_energy_sum
+
+        self.hamiltonians.append(H)
+        self.angular_momentums.append(angular_momentum_sum)
+        return self.hamiltonians, self.angular_momentums
+
+
+
 

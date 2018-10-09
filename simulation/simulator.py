@@ -13,6 +13,9 @@ class Simulator(ABC):
     def run_step(self):
         raise NotImplemented
 
+    def get_uni(self) -> Universe:
+        raise NotImplemented
+
 
 class Player(Simulator):
     def __init__(self, path: str):
@@ -24,6 +27,11 @@ class Player(Simulator):
         pos = (self.history[self.n_step]['pos'][:, 0], self.history[self.n_step]['pos'][:, 1], self.history[self.n_step]['pos'][:, 2])
         self.n_step = min(self.n_step+1, len(self.history)-1)
         return pos
+
+    def get_uni(self):
+        u = Universe()
+        u.stars = self.history[self.n_step]
+        return u
 
 
 class SimRun(Simulator):
@@ -78,6 +86,9 @@ class SimRun(Simulator):
         pickle.dump(self.history, self.logfile)
         self.logfile.flush()
         self.logfile.close()
+
+    def get_uni(self):
+        return self.universe
 
 
 if __name__ == '__main__':

@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D # Don't remove, needed for the 3d plot
 from matplotlib.animation import FuncAnimation
 from simulation import SimRun, Player, Simulator
-from model.galaxyMetrics import Judger
+from model import Jugde
 import numpy as np
 
 
@@ -31,31 +31,33 @@ class MainWindow():
         # Angular momentum viewport configuration
         self.ax3.set_title("Total angular momentum")
 
+        # Metrics computation initialization
+        self.judge = Jugde()
+
         # Start plot maximized
         mng = plt.get_current_fig_manager()
         mng.window.showMaximized()
+
+    def plot_metrics(self):
+        hamiltonian, angular_momentum = self.judge.judge(self.sim.get_uni())
+        self.ax2.cla()
+        self.ax2.set_title("Hamiltonian")
+        self.ax2.plot(hamiltonian)
+
+        self.ax3.cla()
+        self.ax3.set_title('Total angular momentum')
+        self.ax3.plot(angular_momentum)
+
 
     def __update(self, frame_n):
         self.ax1.title.set_text("Universe viewport epoch {}".format(frame_n))
         self.sim.run_step()
         self.scat._offsets3d = self.sim.get_pos()
-        judgedMetrics = self.judger.judge()
-        hamiltions = judgedMetrics['hanmiltonian']
-        self.ax2.cla()
-        self.ax2.set_title("Hamiltonian")
-        self.ax2.plot(hamiltions)
-
-        angularmomentum = judgedMetrics['angularMomentum']
-        self.ax3.cla()
-        self.ax3.set_title('Total angular momentum')
-        self.ax3.plot(angularmomentum)
-        
-        #hamiltonian, angular_momentum = metrics(universe)
+        # self.plot_metrics()
 
     def simulate(self, n_steps=100, n_stars=10):
         self.sim = SimRun(n_steps=n_steps, n_stars=n_stars)
         xs, ys, zs = self.sim.get_pos()
-        self.judger = Judger(self.sim.universe)
         self.scat = self.ax1.scatter(xs, ys, zs, c='y')
 
         # Setup animation
@@ -65,6 +67,7 @@ class MainWindow():
     def __update2(self, frame_n):
         self.ax1.title.set_text("Universe viewport epoch {}".format(frame_n))
         self.scat._offsets3d = self.sim.run_step()
+        # self.plot_metrics()
 
     def replay(self, path):
         self.sim = Player(path)
