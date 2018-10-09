@@ -32,7 +32,7 @@ class Judger:
 			kineticEnergySum += kineticEnergy
 
 			momentum = mass * vel
-			angularMomentum = np.dot(momentum, pos)
+			angularMomentum = pos[0] * momentum[0] + pos[1] * momentum[1] + pos[2] * momentum[2]
 			angularMomentumSum += angularMomentum
 
 			for j in range(len(self.judgedUniverse.stars)):

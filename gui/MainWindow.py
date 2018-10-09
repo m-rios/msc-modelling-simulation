@@ -4,6 +4,7 @@ from matplotlib.animation import FuncAnimation
 from simulation import SimRun, Player, Simulator
 from model.galaxyMetrics import Judger
 import numpy as np
+from simulation.integrator import Euler, Leapfrog, Hermite
 
 
 class MainWindow():
@@ -52,8 +53,14 @@ class MainWindow():
         
         #hamiltonian, angular_momentum = metrics(universe)
 
-    def simulate(self, n_steps=100, n_stars=10):
-        self.sim = SimRun(n_steps=n_steps, n_stars=n_stars)
+    def simulate(self, n_steps=100, n_stars=10, integrator='euler'):
+        if integrator == 'leapfrog':
+            self.sim = SimRun(n_step=n_steps, n_stars=n_stars, Integrator=Leapfrog())
+        elif integrator == 'hermite':
+            self.sim = SimRun(n_step=n_steps, n_stars=n_stars, Integrator=Hermite())
+        else:
+            self.sim = SimRun(n_steps=n_steps, n_stars=n_stars)
+        
         xs, ys, zs = self.sim.get_pos()
         self.judger = Judger(self.sim.universe)
         self.scat = self.ax1.scatter(xs, ys, zs, c='y')
