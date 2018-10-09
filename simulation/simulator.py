@@ -23,7 +23,6 @@ class Player(Simulator):
     def run_step(self):
         pos = (self.history[self.n_step]['pos'][:, 0], self.history[self.n_step]['pos'][:, 1], self.history[self.n_step]['pos'][:, 2])
         self.n_step = min(self.n_step+1, len(self.history)-1)
-        print(self.n_step)
         return pos
 
 
@@ -75,6 +74,8 @@ class SimRun(Simulator):
         return self.universe['pos'][:, 0], self.universe['pos'][:, 1], self.universe['pos'][:, 2]
 
     def __delete__(self, instance):
+        print("Saving logfile")
+        pickle.dump(self.history, self.logfile)
         self.logfile.flush()
         self.logfile.close()
 

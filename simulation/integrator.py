@@ -22,7 +22,7 @@ class Euler(Integrator):
     def __init__(self, dt: float = 1e-3, selector: sel.Selector = sel.AllSelector()):
         super().__init__(dt, selector)
 
-    def do_step(self, uni: Universe):
+    def do_step2(self, uni: Universe):
         assert isinstance(uni, Universe)
 
         # Compute acceleration for each star in the universe
@@ -43,9 +43,34 @@ class Euler(Integrator):
             uni[i]['vel'] = n_vel
             uni[i]['pos'] = n_pos
 
+    def do_step(self, uni: Universe):
+        assert isinstance(uni, Universe)
+        acc = np.zeros((len(uni), 3))
+        for i in range(len(uni)):
+            attractors = uni[self.selector.select(i, uni)]
+            i_star = uni[i]
+            for j_star in attractors:
+                d = j_star['pos'] - i_star['pos']
+                acc[i,:] = acc[i,:] + j_star['mass'] * d/(np.linalg.norm(d)**3)
+        acc = cst.G * acc
+        uni['vel'] = uni['vel'] + self.dt*acc
+        uni['pos'] = uni['pos'] + self.dt*uni['vel']
 
 if __name__ == '__main__':
-    import timeit
-    i2 = Euler()
-    u2 = Universe()
-    print(timeit.timeit('i2.do_step(u2)', 'from __main__ import i2, u2', number=10))
+    # import timeit
+    # i2 = Euler()
+    # u2 = Universe()
+    # stars = np.copy(u2.stars)
+    # print(timeit.timeit('i2.do_step(u2)', 'from __main__ import i2, u2', number=10))
+    # u2.stars = stars
+    # print(timeit.timeit('i2.do_step2(u2)', 'from __main__ import i2, u2', number=10))
+
+    it = Euler()
+    u = Universe()
+    stars_original = np.copy(u.stars)
+    it.do_step(u)
+    stars_fast = np.copy(u.stars)
+    u.stars = stars_original
+    it.do_step2(u)
+    stars_slow = u.stars
+    print(np.array_equal(stars_fast, stars_slow))

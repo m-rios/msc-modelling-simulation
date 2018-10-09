@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import argparse
-from gui.MainWindow import MainWindow
 
 def run_default_simulation(n_steps, n_stars):
     from simulation import SimRun
@@ -8,10 +7,12 @@ def run_default_simulation(n_steps, n_stars):
     run.run()
 
 def run_replay(path):
+    from gui.MainWindow import MainWindow
     w = MainWindow()
     w.replay(path)
 
 def run_default_gui(n_stars):
+    from gui.MainWindow import MainWindow
     w = MainWindow()
     w.simulate(n_stars=n_stars)
 
