@@ -13,18 +13,31 @@ class Simulator(ABC):
     def run_step(self):
         raise NotImplemented
 
+    def get_uni(self) -> Universe:
+        raise NotImplemented
+
+    def get_pos(self) -> (np.ndarray, np.ndarray, np.ndarray):
+        raise NotImplemented
+
 
 class Player(Simulator):
     def __init__(self, path: str):
         self.logfile = open(path, 'rb')
-        self.history = pickle.load(self.logfile)
+        self.universe = pickle.load(self.logfile)
         self.n_step = 0
 
     def run_step(self):
-        pos = (self.history[self.n_step]['pos'][:, 0], self.history[self.n_step]['pos'][:, 1], self.history[self.n_step]['pos'][:, 2])
-        self.n_step = min(self.n_step+1, len(self.history)-1)
-        print(self.n_step)
-        return pos
+        try:
+            self.universe = pickle.load(self.logfile)
+            self.n_step += 1
+        except EOFError:
+            print("Finished at step: {}".format(self.n_step))
+
+    def get_uni(self):
+        return self.universe
+
+    def get_pos(self):
+        return self.universe['pos'][:, 0], self.universe['pos'][:, 1], self.universe['pos'][:, 2]
 
 
 class SimRun(Simulator):
@@ -34,7 +47,6 @@ class SimRun(Simulator):
         self.n_steps = n_steps
         self.epoch = 0
         self.integrator = integrator
-        self.history = []
 
         if universe is None:
             self.universe = Universe(n_stars=n_stars)
@@ -43,40 +55,39 @@ class SimRun(Simulator):
             self.universe = universe
 
         if name == "":
-            self.name = "{} {} {}".format(datetime.now(), self.n_steps, type(self.integrator).__name__.lower())
+            self.name = "test_{}_steps_{}_stars_{}_{}".format(datetime.now(), self.n_steps, len(self.universe), type(self.integrator).__name__.lower())
         else:
             self.name = name
 
-        self.log_file_path = os.path.join(config.log_dir, 'test-'+self.name+'.bin')
+        self.log_file_path = os.path.join(config.log_dir, self.name+'.bin')
         self.logfile = open(self.log_file_path, 'wb')
-        self.simlog = ""
+        self.history = []
 
     def _save(self):
-        self.logfile.write(self.simlog)
-        self.simlog = ""
-        self.logfile.flush()
+        print("saving "+str(self.epoch))
+        pickle.dump(self.universe, self.logfile)
 
     def run(self):
         # Initialize log file
         while self.run_step():
             pass
-        pickle.dump(self.history, self.logfile)
 
     def run_step(self):
-        self.simlog += "e:{},{}\n".format(self.epoch, str(self.universe))
         self.integrator.do_step(self.universe)
-        # if self.epoch % 1000 == 0:
-        #     self._save()
-        self.history.append(np.copy(self.universe.stars))
+        self._save()
         self.epoch += 1
         return self.epoch < self.n_steps
 
     def get_pos(self):
         return self.universe['pos'][:, 0], self.universe['pos'][:, 1], self.universe['pos'][:, 2]
 
-    def __delete__(self, instance):
+    def get_uni(self):
+        return self.universe
+
+    def __del__(self):
         self.logfile.flush()
         self.logfile.close()
+        print('SimRun died')
 
 
 if __name__ == '__main__':

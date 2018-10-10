@@ -66,7 +66,7 @@ class MainWindow():
             self.sim = SimRun(n_steps=n_steps, n_stars=n_stars, integrator=Hermite())
         else:
             self.sim = SimRun(n_steps=n_steps, n_stars=n_stars)
-        
+
         xs, ys, zs = self.sim.get_pos()
         self.judger = Judger(self.sim.universe)
         self.scat = self.ax1.scatter(xs, ys, zs, c='y')
@@ -75,15 +75,12 @@ class MainWindow():
         anim = FuncAnimation(self.fig, self.__update, interval=1)
         plt.show()
 
-    def __update2(self, frame_n):
-        self.ax1.title.set_text("Universe viewport epoch {}".format(frame_n))
-        self.scat._offsets3d = self.sim.run_step()
-
     def replay(self, path):
         self.sim = Player(path)
-        xs, ys, zs = self.sim.run_step()
+        self.sim.run_step()
+        xs, ys, zs = self.sim.get_pos()
         self.scat = self.ax1.scatter(xs, ys, zs, c='y')
         # Setup animation
-        anim = FuncAnimation(self.fig, self.__update2, interval=50)
+        anim = FuncAnimation(self.fig, self.__update, interval=50)
         plt.show()
 
