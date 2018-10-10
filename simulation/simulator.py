@@ -29,8 +29,9 @@ class Player(Simulator):
     def run_step(self):
         try:
             self.universe = pickle.load(self.logfile)
+            self.n_step += 1
         except EOFError:
-            pass
+            print("Finished at step: {}".format(self.n_step))
 
     def get_uni(self):
         return self.universe
