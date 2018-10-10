@@ -125,8 +125,8 @@ class Hermite(Integrator):
         for j_star in attracting_stars:
             d = i_star['pos'] - j_star['pos']
             relativeV = i_star['vel'] - j_star['vel']
-            jerk += cst.G * j_star['mass'] * (relativeV/pow(norm(relativeV), 3) - 3 * (d * relativeV) * d / pow(norm(d), 5))
-        
+            jerk += cst.G * j_star['mass'] * (relativeV/pow(norm(d), 3) - 3 * (norm(d) * relativeV) * norm(d) / pow(norm(d), 5))
+        d
         return jerk
 
 
