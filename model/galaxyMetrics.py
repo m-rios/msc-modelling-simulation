@@ -29,10 +29,12 @@ class Judger:
             pos = currentStart['pos']
             mass = currentStart['mass']
             vel = currentStart['vel']
-            kineticEnergy = np.dot(vel, vel)/(2 * mass)
+
+            momentum = mass * vel
+            kineticEnergy = np.dot(momentum, momentum)/(2 * mass)
             kineticEnergySum += kineticEnergy
 
-            momentum = vel * mass
+            
             angularMomentum = np.cross(pos, momentum)
             angularMomentumSum += angularMomentum
 
@@ -46,11 +48,13 @@ class Judger:
                     potentilEnergySum -= U
 
         # self.hamiltionians.append(H)
+		
+		
+		# potential = self.hamiltionians['potential']
         potential = self.hamiltionians['potential']
         potential.append(potentilEnergySum)
         kinetic = self.hamiltionians['kinetic']
         kinetic.append(kineticEnergySum)
-        print (kineticEnergySum)
         HEnergy = self.hamiltionians['sum']
         HEnergy.append(potentilEnergySum + kineticEnergySum)
 
@@ -60,7 +64,7 @@ class Judger:
         # ys = self.angularMomentSums['ys']
         # ys.append(angularMomentumSum[1])
         # zes = self.angularMomentSums['zes']
-        # zes.append(angularMomentumSum[2])
+        # zes.append(angularMomentumSum[2]
         self.angularMomentSums.append(norm(angularMomentumSum))
         return {'hanmiltonian' : self.hamiltionians, 'angularMomentum' : self.angularMomentSums}
 

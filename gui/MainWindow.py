@@ -53,8 +53,12 @@ class MainWindow():
         # self.ax2.plot(hamiltions)
 
         angularmomentum = judgedMetrics['angularMomentum']
+        middle = int(angularmomentum[-1]) 
         self.ax3.cla()
         self.ax3.set_title('Total angular momentum')
+        self.ax3.set_ylim(middle - 20, middle + 20)
+        ythicks = np.arange(middle - 20, middle + 20, 5)
+        self.ax3.set_yticks(ythicks)
         self.ax3.plot(angularmomentum, color='red', label='x angular momentum')
         
         #hamiltonian, angular_momentum = metrics(universe)
