@@ -48,11 +48,11 @@ class MainWindow():
         self.ax3.set_title('Total angular momentum')
         self.ax3.plot(angular_momentum)
 
-
     def __update(self, frame_n):
         self.ax1.title.set_text("Universe viewport epoch {}".format(frame_n))
         self.sim.run_step()
         self.scat._offsets3d = self.sim.get_pos()
+        print("step: " + str(frame_n))
         # self.plot_metrics()
 
     def simulate(self, n_steps=100, n_stars=10):
@@ -64,16 +64,12 @@ class MainWindow():
         anim = FuncAnimation(self.fig, self.__update, interval=1)
         plt.show()
 
-    def __update2(self, frame_n):
-        self.ax1.title.set_text("Universe viewport epoch {}".format(frame_n))
-        self.scat._offsets3d = self.sim.run_step()
-        # self.plot_metrics()
-
     def replay(self, path):
         self.sim = Player(path)
-        xs, ys, zs = self.sim.run_step()
+        self.sim.run_step()
+        xs, ys, zs = self.sim.get_pos()
         self.scat = self.ax1.scatter(xs, ys, zs, c='y')
         # Setup animation
-        anim = FuncAnimation(self.fig, self.__update2, interval=50)
+        anim = FuncAnimation(self.fig, self.__update, interval=50)
         plt.show()
 

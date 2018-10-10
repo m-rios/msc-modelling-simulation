@@ -1,24 +1,5 @@
 import numpy as np
-from scipy import stats
 from galpy.df import dehnendf
-
-class Galaxy:
-
-    def __init__(self, m, a, b):
-        self.m = m
-        self.a = a
-        self.b = b
-        self.norm = stats.norm()
-        print(self.norm.rvs())
-
-    def _density(self, R, z):
-        t1 = (self.b**2 * self.m)/4*np.pi
-        t2 = self.a*R**2 +(self.a + 3*(z**2 + self.b**2)**(1/2))*(self.a+(z**2 + self.b**2)**(1/2))**2
-        t3 = (R**2 + (self.a + (z**2 + self.b**2)**1/2)**2)**(2/5)*(z**2+self.b**2)**(3/2)
-        return t1 * (t2/t3)
-
-    def sample_galaxy(self):
-        pass
 
 
 class Universe:
@@ -42,7 +23,7 @@ class Universe:
             self.stars['mass'] = np.random.rand(n_stars)*1e10
 
             # self.add_galaxy(1e10, 3, 2, n_stars)
-            self.add_galaxy(1, n_stars)
+            self.add_galaxy(1e5, n_stars)
 
     def add_galaxy(self, mass, n_stars):
         dfc = dehnendf(beta=0.)
@@ -56,7 +37,6 @@ class Universe:
             unit_pos = self.stars['pos'][idx, 0:2]/np.linalg.norm(self.stars['pos'][idx, 0:2])
             unit_vel = np.array([-unit_pos[1], unit_pos[0]])  # 90 deg rotated counterclockwise
             self.stars['vel'][idx, 0:2] = unit_vel * tangential
-
 
     def __len__(self):
         return len(self.stars)
@@ -92,5 +72,3 @@ class Universe:
         self.stars = np.delete(self.stars, idx)
 
 
-if __name__ == '__main__':
-    print(Galaxy(1,1,1))

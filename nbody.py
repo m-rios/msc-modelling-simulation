@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import argparse
 
-def run_default_simulation(n_steps, n_stars):
+def run_default_simulation(n_steps, n_stars, name):
     from simulation import SimRun
-    run = SimRun(n_steps=n_steps, n_stars=n_stars)
+    run = SimRun(n_steps=n_steps, n_stars=n_stars, name=name)
     run.run()
 
 def run_replay(path):
@@ -23,11 +23,12 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--replay', metavar='PATH', help='replay a simulation log, for visualization purposes')
     parser.add_argument('-s', metavar='n stars', help='number of stars to run simulation on', default=10)
     parser.add_argument('-i', metavar='step integrator', help='choose a integrator for the position, velocity, acceleration change of eacth star')
+    parser.add_argument('--name', metavar='NAME', help='name of the log file', default="")
     args = parser.parse_args()
 
     if args.batch is not None:
         print ('default sim')
-        run_default_simulation(int(args.batch), int(args.s))
+        run_default_simulation(int(args.batch), int(args.s), args.name)
     elif args.replay is not None:
         print ('replay sim')
         run_replay(args.replay)
