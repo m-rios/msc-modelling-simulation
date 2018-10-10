@@ -14,25 +14,26 @@ class Judger:
 	def __init__(self, judgedUniverse: Universe=None):
 		super(Judger, self).__init__()
 		self.judgedUniverse=judgedUniverse
-		self.hamiltionians = []
-		self.angularMomentums = []
+		self.hamiltionians = {'potential' : [], 'kinetic':[], 'sum' : []}
+		self.angularMomentSums = {'xes' : [], 'ys' : [], 'zes' : []}
 		
 
 	def judge(self):
 		# print('start!')
-		angularMomentumSum = 0
 		potentilEnergySum = 0
 		kineticEnergySum = 0
+		angularMomentumSum = [0,0,0]
+
 		for i in range(len(self.judgedUniverse.stars)):
 			currentStart = self.judgedUniverse.stars[i]
 			pos = currentStart['pos']
 			mass = currentStart['mass']
 			vel = currentStart['vel']
-			kineticEnergy = pow(norm(vel),2)/(2 * mass) 
+			kineticEnergy = np.dot(vel, vel)/(2 * mass) 
 			kineticEnergySum += kineticEnergy
 
-			momentum = mass * vel
-			angularMomentum = pos[0] * momentum[0] + pos[1] * momentum[1] + pos[2] * momentum[2]
+			momentum = vel * mass
+			angularMomentum = np.cross(pos, momentum)
 			angularMomentumSum += angularMomentum
 
 			for j in range(len(self.judgedUniverse.stars)):
@@ -42,13 +43,26 @@ class Judger:
 
 				if i != j:
 					U = constants.G * mass * jMass / norm(pos - jPos)
-					potentilEnergySum += U
+					potentilEnergySum -= U
 		
-		H = kineticEnergySum + potentilEnergySum
+		print(potentilEnergySum)
 		
-		self.hamiltionians.append(H)
-		self.angularMomentums.append(angularMomentumSum)
-		return {'hanmiltonian' : self.hamiltionians, 'angularMomentum' : self.angularMomentums}
+		# self.hamiltionians.append(H)
+		potential = self.hamiltionians['potential']
+		potential.append(potentilEnergySum)
+		kinetic = self.hamiltionians['kinetic']
+		kinetic.append(kineticEnergySum)
+		HEnergy = self.hamiltionians['sum']
+		HEnergy.append(potentilEnergySum + kineticEnergySum)
+
+
+		xes = self.angularMomentSums['xes']
+		xes.append(angularMomentumSum[0])
+		ys = self.angularMomentSums['ys']
+		ys.append(angularMomentumSum[1])
+		zes = self.angularMomentSums['zes']
+		zes.append(angularMomentumSum[2])
+		return {'hanmiltonian' : self.hamiltionians, 'angularMomentum' : self.angularMomentSums}
 		
 	
 		
