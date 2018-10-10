@@ -15,7 +15,7 @@ class Judger:
 		super(Judger, self).__init__()
 		self.judgedUniverse=judgedUniverse
 		self.hamiltionians = {'potential' : [], 'kinetic':[], 'sum' : []}
-		self.angularMomentSums = {'xes' : [], 'ys' : [], 'zes' : []}
+		self.angularMomentSums = []
 		
 
 	def judge(self):
@@ -45,23 +45,23 @@ class Judger:
 					U = constants.G * mass * jMass / norm(pos - jPos)
 					potentilEnergySum -= U
 		
-		print(potentilEnergySum)
-		
 		# self.hamiltionians.append(H)
 		potential = self.hamiltionians['potential']
 		potential.append(potentilEnergySum)
 		kinetic = self.hamiltionians['kinetic']
 		kinetic.append(kineticEnergySum)
+		print (kineticEnergySum)
 		HEnergy = self.hamiltionians['sum']
 		HEnergy.append(potentilEnergySum + kineticEnergySum)
 
 
-		xes = self.angularMomentSums['xes']
-		xes.append(angularMomentumSum[0])
-		ys = self.angularMomentSums['ys']
-		ys.append(angularMomentumSum[1])
-		zes = self.angularMomentSums['zes']
-		zes.append(angularMomentumSum[2])
+		# xes = self.angularMomentSums['xes']
+		# xes.append(angularMomentumSum[0])
+		# ys = self.angularMomentSums['ys']
+		# ys.append(angularMomentumSum[1])
+		# zes = self.angularMomentSums['zes']
+		# zes.append(angularMomentumSum[2])
+		self.angularMomentSums.append(norm(angularMomentumSum))
 		return {'hanmiltonian' : self.hamiltionians, 'angularMomentum' : self.angularMomentSums}
 		
 	

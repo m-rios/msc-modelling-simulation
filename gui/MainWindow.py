@@ -48,20 +48,14 @@ class MainWindow():
         kinetic = hamiltions['kinetic']
         HSum = hamiltions['sum']
         self.ax2.plot(potential, color='red', label='potential')
-        print (potential)
         self.ax2.plot(kinetic, color='green', label='kinetic')
         self.ax2.plot(HSum, color='blue', label='HSum')
         # self.ax2.plot(hamiltions)
 
         angularmomentum = judgedMetrics['angularMomentum']
-        xes = angularmomentum['xes']
-        ys = angularmomentum['ys']
-        zes = angularmomentum['zes']
         self.ax3.cla()
         self.ax3.set_title('Total angular momentum')
-        self.ax3.plot(xes, color='red', label='x angular momentum')
-        self.ax3.plot(ys, color='green', label='y angular momentum')
-        self.ax3.plot(zes, color='blue', label='z angular momentum')
+        self.ax3.plot(angularmomentum, color='red', label='x angular momentum')
         
         #hamiltonian, angular_momentum = metrics(universe)
 

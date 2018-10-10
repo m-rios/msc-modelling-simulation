@@ -77,65 +77,57 @@ class Hermite(Integrator):
     def __init__(self, dt: float = 1e-3, selector: sel.Selector = sel.AllSelector()):
         super().__init__(dt, selector)
     
-    # def do_step(self, uni:Universe):
+    def do_step(self, uni:Universe):
 
-    #     shadowGalaxy = []
-    #     shadowUniverse = Universe()
-    #     shadowUniverse.galaxy = shadowGalaxy
+        shadowUniverse = Universe(n_stars=len(uni))
 
-    #     for i in range(len(uni)): #calculate prediction velo and posiiton
+        for i in range(len(uni)): #calculate prediction velo and posiiton
 
-    #         star = uni.stars[i]
-    #         starJ = self.calculateJ(uni, i)
-    #         shadowStar = [('pos', (np.float64, 3)),
-    #                                           ('vel', (np.float64, 3)),
-    #                                           ('acc', (np.float64, 3)),
-    #                                           ('acc2', (np.float64, 3)),
-    #                                           ('acc3', (np.float64, 3)),
-    #                                           ('mass', np.float64)]
-    #         predicatPos = star['pos'] + star['vel'] * dt + star['vel'] * pow(dt, 2) / 2 + starJ * pow(dt, 3) / 6
-    #         predicatVel = star['vel'] + star['acc'] * dt + starJ * pow(dt, 2) / 2
-    #         shadowStar['pos'] = predicatPos
-    #         shadowStar['vel'] = predicatVel
-    #         shadowGalaxy.append(shadowStar)
+            star = uni.stars[i]
+            starJerk = self.calculateJ(uni, i)
+            shadowStar = shadowUniverse.stars[i]
+            predicatPos = star['pos'] + star['vel'] * self.dt + star['vel'] * pow(self.dt, 2) / 2 + starJerk * pow(self.dt, 3) / 6
+            predicatVel = star['vel'] + star['acc'] * self.dt + starJerk * pow(self.dt, 2) / 2
+            shadowStar['pos'] = predicatPos
+            shadowStar['vel'] = predicatVel
         
 
-    #     for i in range(len(shadowUniverse.galaxy)): #calculate prediction acceleration
+        for i in range(len(shadowUniverse)): #calculate prediction acceleration
 
-    #         i_star = shadowUniverse.galaxy[i]
-    #         predicateAcc = 0
+            i_star = shadowUniverse.stars[i]
+            predicateAcc = 0
 
-    #         attracting_stars = self.selector.select(i, shadowUniverse).galaxy
-    #         for j_star in attracting_stars:
-    #             d = i_star.pos - j_star.pos
-    #             predicateAcc += cst.G * j_star.mass * d/norm(d)
+            attracting_stars = shadowUniverse[self.selector.select(i, shadowUniverse)]
+            for j_star in attracting_stars:
+                d = i_star['pos'] - j_star['pos']
+                predicateAcc += cst.G * j_star['mass'] * d/norm(d)
             
-    #         i_star.acc = predicateAcc
+            i_star['acc'] = predicateAcc
         
-    #     for i in range(len(uni.galaxy)):
-    #         i_star = uni.galaxy[i]
-    #         i_star_jerk = self.calculateJ(uni.galaxy, i)
+        for i in range(len(uni)):
+            i_star = uni.stars[i]
+            i_star_jerk = self.calculateJ(uni, i)
             
-    #         i_shadowStar = shadowGalaxy[i]
-    #         i_shadowStar_jerk = self.calculateJ(shadowGalaxy, i)
+            i_shadowStar = shadowUniverse.stars[i]
+            i_shadowStar_jerk = self.calculateJ(shadowUniverse, i)
 
 
-    #         i_star_v1 = i_star.vel + (i_star.acc + i_shadowStar.acc) * dt / 2 + (i_star_jerk - i_shadowStar_jerk) * pow(dt, 2) / 12
-    #         i_star.pos = i_star.pos + (i_star.vel + i_star_v1) * dt / 2 + (i_star.acc - i_shadowStar.acc) * pow(dt, 2) / 12
-    #         i_star.vel = i_star_v1
+            i_star_v1 = i_star['vel'] + (i_star['acc'] + i_shadowStar['acc']) * self.dt / 2 + (i_star_jerk - i_shadowStar_jerk) * pow(self.dt, 2) / 12
+            i_star['pos'] = i_star['pos'] + (i_star['vel'] + i_star_v1) * self.dt / 2 + (i_star['acc'] - i_shadowStar['acc']) * pow(self.dt, 2) / 12
+            i_star['vel'] = i_star_v1
 
     
-    # def calculateJ(uni:Universe, i:int=1):
+    def calculateJ(self,uni:Universe, i:int=1):
 
-    #     i_star = uni.stars[i]
-    #     jerk = 0
-    #     attracting_stars = uni[self.selector.select(i, uni)]
-    #     for j_star in attracting_stars:
-    #         d = i_star['pos'] - j_star['pos']
-    #         relativeV = i_star['vel'] - j_star['vel']
-    #         jerk += cst.G * j_star['mass'] * (relativeV/pow(norm(relativeV,3)) - 3 * (d * relativeV) * d / pow(norm(d), 5))
+        i_star = uni.stars[i]
+        jerk = 0
+        attracting_stars = uni[self.selector.select(i, uni)]
+        for j_star in attracting_stars:
+            d = i_star['pos'] - j_star['pos']
+            relativeV = i_star['vel'] - j_star['vel']
+            jerk += cst.G * j_star['mass'] * (relativeV/pow(norm(relativeV), 3) - 3 * (d * relativeV) * d / pow(norm(d), 5))
         
-    #     return jerk
+        return jerk
 
 
 if __name__ == '__main__':
