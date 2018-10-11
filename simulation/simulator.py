@@ -24,14 +24,14 @@ class Player(Simulator):
     def __init__(self, path: str):
         self.logfile = open(path, 'rb')
         self.universe = pickle.load(self.logfile)
-        self.n_step = 0
+        self.epoch = 0
 
     def run_step(self):
         try:
             self.universe = pickle.load(self.logfile)
-            self.n_step += 1
+            self.epoch += 1
         except EOFError:
-            print("Finished at step: {}".format(self.n_step))
+            print("Finished at step: {}".format(self.epoch))
 
     def get_uni(self):
         return self.universe

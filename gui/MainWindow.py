@@ -19,7 +19,7 @@ class MainWindow:
         self.ax3 = plt.subplot(self.grid[1, 2:])
 
         # Universe viewport configuration
-        self.ax1._axes.set_aspect('equal')
+        # self.ax1._axes.set_aspect('equal')
         self.ax1.set_facecolor((24/255, 24/255, 24/255))
         self.ax1.axis('off')
         self.ax1.set_title("Universe viewport", y=1.085)
@@ -61,7 +61,7 @@ class MainWindow:
         #hamiltonian, angular_momentum = metrics(universe)
 
     def __update(self, frame_n):
-        self.ax1.title.set_text("Universe viewport epoch {}".format(frame_n))
+        self.ax1.title.set_text("Universe viewport epoch {}".format(self.sim.epoch))
         self.sim.run_step()
         xs, ys, zs = self.sim.get_pos()
         self.stars.set_data([xs, ys])

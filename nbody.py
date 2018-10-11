@@ -2,11 +2,13 @@
 import argparse
 import simulation
 from simulation import Euler, Leapfrog, Hermite
+from model import Universe
 
 
-def run_default_simulation(n_steps, n_stars, name):
+def run_batch(args):
     from simulation import SimRun
-    run = SimRun(n_steps=n_steps, n_stars=n_stars, name=name)
+    u = Universe(n_stars=args.s, mass=args.m)
+    run = SimRun(n_steps=args.n, universe=u, name=args.name)
     run.run()
 
 
@@ -43,7 +45,7 @@ if __name__ == '__main__':
 
     if args.batch:
         print('Running in batch mode')
-        run_default_simulation(args)
+        run_batch(args)
     elif args.replay is not None:
         print('Replaying simulation')
         run_replay(args)
