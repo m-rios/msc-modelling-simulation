@@ -4,6 +4,7 @@ import model.constants as cst
 from numpy.linalg import norm
 import simulation.selector as sel
 import numpy as np
+import copy
 
 class Integrator(ABC):
     # Abstract integrator class. All integrator methods must extend this class
@@ -88,46 +89,66 @@ class Leapfrog(Integrator):
 class Hermite(Integrator):
     def __init__(self, dt: float = 1e-3, selector: sel.Selector = sel.AllSelector()):
         super().__init__(dt, selector)
-    
+
     def do_step(self, uni:Universe):
+        # old_pos = @pos  //(1)
+        # old_vel = @vel
+        # old_acc = acc
+        # old_jerk = jerk
 
-        shadowUniverse = Universe(n_stars=len(uni))
+        # @pos += @vel*dt + old_acc*(dt*dt/2.0) + old_jerk*(dt*dt*dt/6.0) //(2) (3)
+        # @vel += old_acc*dt + old_jerk*(dt*dt/2.0)
 
-        for i in range(len(uni)): #calculate prediction velo and posiiton
-
-            star = uni.stars[i]
-            starJerk = self.calculateJ(uni, i)
-            shadowStar = shadowUniverse.stars[i]
-            predicatPos = star['pos'] + star['vel'] * self.dt + star['vel'] * pow(self.dt, 2) / 2 + starJerk * pow(self.dt, 3) / 6
-            predicatVel = star['vel'] + star['acc'] * self.dt + starJerk * pow(self.dt, 2) / 2
-            shadowStar['pos'] = predicatPos
-            shadowStar['vel'] = predicatVel
         
 
-        for i in range(len(shadowUniverse)): #calculate prediction acceleration
+        #recorde all the all values (1)
+        shadowUniverse = Universe(len(uni))
+        old_jerks = []
+        for i in range(len(uni)):
+            old_jerk = self.calculateJ(uni, i)
+            old_jerks.append(old_jerk)
+            i_star = uni.stars[i]
+            shadowStar = shadowUniverse.stars[i]
+            shadowStar['pos'] = copy.deepcopy(i_star['pos'])
+            shadowStar['vel'] = copy.deepcopy(i_star['vel'])
+            shadowStar['acc'] = copy.deepcopy(i_star['acc']) 
+        
+        #calculate the middle status (2)
+        
+        for i in range(len(shadowUniverse)):
+            i_star = uni.stars[i]
+            i_shadow_star = shadowUniverse.stars[i]
+            i_shadow_star_jerk = old_jerks[i]
+            i_star['pos'] += i_shadow_star['vel'] * self.dt + i_shadow_star['acc'] * (pow(self.dt,2) / 2.0) + i_shadow_star_jerk * (pow(self.dt, 3) / 6.0)
+            i_star['vel'] += i_shadow_star['acc'] * self.dt + i_shadow_star_jerk * (pow(self.dt, 2) / 2.0) 
 
-            i_star = shadowUniverse.stars[i]
-            predicateAcc = 0
-
-            attracting_stars = shadowUniverse[self.selector.select(i, shadowUniverse)]
+        #calculate a new acceleration and jerk (3)
+        new_jerks = []
+        for i in range(len(uni)):
+            n_acc = 0
+            i_star = uni.stars[i]
+            jerk = self.calculateJ(uni, i)
+            new_jerks.append(jerk)
+            attracting_stars = uni[self.selector.select(i, uni)]
             for j_star in attracting_stars:
                 d = i_star['pos'] - j_star['pos']
-                predicateAcc += cst.G * j_star['mass'] * d/norm(d)
+                n_acc += cst.G * j_star['mass'] * d/(norm(d)**3)
             
-            i_star['acc'] = predicateAcc
+            i_star['acc'] = n_acc
         
+        # @vel = old_vel + (old_acc + acc)*(dt/2.0) + (old_jerk - jerk)*(dt*dt/12.0) //(4)
+        # @pos = old_pos + (old_vel + vel)*(dt/2.0) + (old_acc - acc)*(dt*dt/12.0)
+
+        #calculate the final result (4)
         for i in range(len(uni)):
             i_star = uni.stars[i]
-            i_star_jerk = self.calculateJ(uni, i)
+            i_shadow_star = shadowUniverse.stars[i]
+            old_jerk = old_jerks[i]
+            jerk = new_jerks[i]
+            i_star['vel'] = i_shadow_star['vel'] + (i_shadow_star['acc'] + i_star['acc']) * (self.dt / 2.0) + (old_jerk - jerk) * (pow(self.dt,2) / 12.0)
+            i_star['pos'] = i_shadow_star['pos'] + (i_shadow_star['vel'] + i_star['vel']) * (self.dt / 2.0) + (i_shadow_star['acc'] - i_star['acc']) * (pow(self.dt,2) / 12.0)
             
-            i_shadowStar = shadowUniverse.stars[i]
-            i_shadowStar_jerk = self.calculateJ(shadowUniverse, i)
-
-
-            i_star_v1 = i_star['vel'] + (i_star['acc'] + i_shadowStar['acc']) * self.dt / 2 + (i_star_jerk - i_shadowStar_jerk) * pow(self.dt, 2) / 12
-            i_star['pos'] = i_star['pos'] + (i_star['vel'] + i_star_v1) * self.dt / 2 + (i_star['acc'] - i_shadowStar['acc']) * pow(self.dt, 2) / 12
-            i_star['vel'] = i_star_v1
-
+    
     
     def calculateJ(self,uni:Universe, i:int=1):
 
@@ -138,8 +159,49 @@ class Hermite(Integrator):
             d = i_star['pos'] - j_star['pos']
             relativeV = i_star['vel'] - j_star['vel']
             jerk += cst.G * j_star['mass'] * (relativeV/pow(norm(d), 3) - 3 * (norm(d) * relativeV) * norm(d) / pow(norm(d), 5))
-        d
+    
         return jerk
+    # def do_step(self, uni:Universe):
+
+    #     shadowUniverse = Universe(n_stars=len(uni))
+
+    #     for i in range(len(uni)): #calculate prediction velo and posiiton
+
+    #         star = uni.stars[i]
+    #         starJerk = self.calculateJ(uni, i)
+    #         shadowStar = shadowUniverse.stars[i]
+    #         predicatPos = star['pos'] + star['vel'] * self.dt + star['vel'] * pow(self.dt, 2) / 2 + starJerk * pow(self.dt, 3) / 6
+    #         predicatVel = star['vel'] + star['acc'] * self.dt + starJerk * pow(self.dt, 2) / 2
+    #         shadowStar['pos'] = predicatPos
+    #         shadowStar['vel'] = predicatVel
+        
+
+    #     for i in range(len(shadowUniverse)): #calculate prediction acceleration
+
+    #         i_star = shadowUniverse.stars[i]
+    #         predicateAcc = 0
+
+    #         attracting_stars = shadowUniverse[self.selector.select(i, shadowUniverse)]
+    #         for j_star in attracting_stars:
+    #             d = i_star['pos'] - j_star['pos']
+    #             predicateAcc += cst.G * j_star['mass'] * d/norm(d)
+            
+    #         i_star['acc'] = predicateAcc
+        
+    #     for i in range(len(uni)):
+    #         i_star = uni.stars[i]
+    #         i_star_jerk = self.calculateJ(uni, i)
+            
+    #         i_shadowStar = shadowUniverse.stars[i]
+    #         i_shadowStar_jerk = self.calculateJ(shadowUniverse, i)
+
+
+    #         i_star_v1 = i_star['vel'] + (i_star['acc'] + i_shadowStar['acc']) * self.dt / 2 + (i_star_jerk - i_shadowStar_jerk) * pow(self.dt, 2) / 12
+    #         i_star['pos'] = i_star['pos'] + (i_star['vel'] + i_star_v1) * self.dt / 2 + (i_star['acc'] - i_shadowStar['acc']) * pow(self.dt, 2) / 12
+    #         i_star['vel'] = i_star_v1
+
+    
+    
 
 
 if __name__ == '__main__':

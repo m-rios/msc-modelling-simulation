@@ -54,12 +54,13 @@ class Judger:
             mass = currentStart['mass']
             vel = currentStart['vel']
 
-            momentum = vel * mass
+            momentum = mass * vel
+            kineticEnergy = np.dot(momentum, momentum)/(2 * mass)
+            kineticEnergySum += kineticEnergy
+
+
             angularMomentum = np.cross(pos, momentum)
             angularMomentumSum += angularMomentum
-
-            kineticEnergy = (norm(angularMomentum)**2)/(2 * mass)
-            kineticEnergySum += kineticEnergy
 
             for j in range(len(self.judgedUniverse.stars)):
                 jStar = self.judgedUniverse.stars[j]
@@ -84,7 +85,7 @@ class Judger:
         # ys = self.angularMomentSums['ys']
         # ys.append(angularMomentumSum[1])
         # zes = self.angularMomentSums['zes']
-        # zes.append(angularMomentumSum[2])
+        # zes.append(angularMomentumSum[2]
         self.angularMomentSums.append(norm(angularMomentumSum))
         return {'hanmiltonian' : self.hamiltionians, 'angularMomentum' : self.angularMomentSums}
 
