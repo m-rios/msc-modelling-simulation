@@ -9,13 +9,14 @@ import numpy as np
 
 
 class Simulator(ABC):
+    def __init__(self):
+        self.universe: Universe = None
+
     @abstractmethod
     def run_step(self):
         raise NotImplemented
 
-    def get_uni(self) -> Universe:
-        raise NotImplemented
-
+    @abstractmethod
     def get_pos(self) -> (np.ndarray, np.ndarray, np.ndarray):
         raise NotImplemented
 
@@ -32,9 +33,6 @@ class Player(Simulator):
             self.epoch += 1
         except EOFError:
             print("Finished at step: {}".format(self.epoch))
-
-    def get_uni(self):
-        return self.universe
 
     def get_pos(self):
         return self.universe['pos'][:, 0], self.universe['pos'][:, 1], self.universe['pos'][:, 2]
@@ -55,7 +53,7 @@ class SimRun(Simulator):
             self.universe = universe
 
         if name == "":
-            self.name = "test_{}_steps_{}_stars_{}_{}".format(datetime.now(), self.n_steps, len(self.universe), type(self.integrator).__name__.lower())
+            self.name = "test_{}_steps_{}_stars_{}_mass_{}_{}".format(datetime.now(), self.n_steps, len(self.universe), self.universe.mass, type(self.integrator).__name__.lower())
         else:
             self.name = name
 
@@ -80,9 +78,6 @@ class SimRun(Simulator):
 
     def get_pos(self):
         return self.universe['pos'][:, 0], self.universe['pos'][:, 1], self.universe['pos'][:, 2]
-
-    def get_uni(self):
-        return self.universe
 
     def __del__(self):
         self.logfile.flush()

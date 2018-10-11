@@ -30,49 +30,44 @@ class MainWindow:
         # Hamiltonian viewport configuration
         self.ax2.set_title("Hamiltonian")
         self.ax2.set_xlim(0,100)
-        hamilton_x_ticks = np.arange(0, 100, 5)
-        self.ax2.set_xticks(hamilton_x_ticks)
+        # hamil, A = self.judger.metrics(self.sim.universe)
+        # self.hamiltonian_plot, = self.ax2.plot(hamil['H'], [0])
 
         # Angular momentum viewport configuration
         self.ax3.set_title("Total angular momentum")
+        # self.angularmomentum = self.ax3.plot(metrics['angularMomentum'])
 
         # Start plot maximized
         mng = plt.get_current_fig_manager()
         mng.window.showMaximized()
 
-    def __plot_metrics(self):
-        metrics = self.judger.metrics(self.sim.universe)
-        hamiltions = metrics['hanmiltonian']
-        self.ax2.cla()
-        self.ax2.set_title("Hamiltonian")
-        potential = hamiltions['potential']
-        kinetic = hamiltions['kinetic']
-        HSum = hamiltions['sum']
-        # self.ax2.plot(potential, color='red', label='potential')
-        # self.ax2.plot(kinetic, color='green', label='kinetic')
-        self.ax2.plot(HSum, color='blue', label='HSum')
-        # self.ax2.plot(hamiltions)
-
-        angularmomentum = metrics['angularMomentum']
-        self.ax3.cla()
-        self.ax3.set_title('Total angular momentum')
-        self.ax3.plot(angularmomentum, color='red', label='x angular momentum')
-
-        #hamiltonian, angular_momentum = metrics(universe)
-
     def __update(self, frame_n):
+        # universe
         self.ax1.title.set_text("Universe viewport epoch {}".format(self.sim.epoch))
         self.sim.run_step()
         xs, ys, zs = self.sim.get_pos()
         self.stars.set_data([xs, ys])
         self.stars.set_3d_properties(zs)
+
+        # metrics
+        # hamil, A = self.judger.metrics(self.sim.universe)
+        # self.hamiltonian_plot.set_data(hamil['H'], np.arange(0, len(hamil['H'])))
+        # self.hamiltonian_plot.axes.axis([0, len(hamil['H']), np.min(hamil['H']), np.max(hamil['H'])])
         return self.stars,
+        # return self.stars, self.hamiltonian_plot
+        # return self.hamiltonian_plot,
 
     def __init(self):
         xs, ys, zs = self.sim.get_pos()
         self.stars.set_data([xs, ys])
         self.stars.set_3d_properties(zs)
+
+        # hamil, _ = self.judger.metrics(self.sim.universe)
+        # self.hamiltonian_plot.set_data(hamil['H'], [0])
+        # self.hamiltonian_plot.axes.axis([0, len(hamil['H']), np.min(hamil['H']), np.max(hamil['H'])])
         return self.stars,
+        # return self.stars, self.hamiltonian_plot
+        # return self.hamiltonian_plot,
 
     def simulate(self):
         # xs, ys, zs = self.sim.get_pos()

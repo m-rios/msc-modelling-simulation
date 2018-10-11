@@ -4,6 +4,7 @@ from galpy.df import dehnendf
 
 class Universe:
     def __init__(self, n_stars=100, star_array=None, mass=1e5):
+        self.mass = mass
         self.__star_fields = [('pos', (np.float64, 3)),
                                               ('vel', (np.float64, 3)),
                                               ('acc', (np.float64, 3)),
@@ -23,7 +24,7 @@ class Universe:
             self.stars['mass'] = np.random.rand(n_stars)
 
             # self.add_galaxy(1e10, 3, 2, n_stars)
-            self.add_galaxy(mass, n_stars)
+            self.add_galaxy(self.mass, n_stars)
 
     def add_galaxy(self, mass, n_stars):
         dfc = dehnendf(beta=0.)
