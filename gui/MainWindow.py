@@ -1,15 +1,15 @@
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D # Don't remove, needed for the 3d plot
 from matplotlib.animation import FuncAnimation
-from simulation import SimRun, Player, Simulator
+from simulation import Simulator
 from model.galaxyMetrics import Judger
 import numpy as np
-from simulation.integrator import Euler, Leapfrog, Hermite
 
 
-class MainWindow():
-    def __init__(self):
-        self.sim: Simulator = None
+class MainWindow:
+    def __init__(self, sim: Simulator):
+        self.sim = sim
+        self.judger = Judger(self.sim.universe)
         # Configure plotting
         plt.switch_backend('Qt5Agg')
         self.fig = plt.figure()
@@ -17,11 +17,15 @@ class MainWindow():
         self.ax1 = plt.subplot(self.grid[:, :2], projection='3d')
         self.ax2 = plt.subplot(self.grid[0, 2:])
         self.ax3 = plt.subplot(self.grid[1, 2:])
+
         # Universe viewport configuration
         self.ax1._axes.set_aspect('equal')
         self.ax1.set_facecolor((24/255, 24/255, 24/255))
         self.ax1.axis('off')
         self.ax1.set_title("Universe viewport", y=1.085)
+        xs, ys, zs = self.sim.get_pos()
+        self.stars, = self.ax1.plot(xs, ys, zs, 'oy', markersize=2)
+        # self.stars, = self.ax1.plot(xs, ys, 'oy')
 
         # Hamiltonian viewport configuration
         self.ax2.set_title("Hamiltonian")
@@ -36,51 +40,46 @@ class MainWindow():
         mng = plt.get_current_fig_manager()
         mng.window.showMaximized()
 
-    def __update(self, frame_n):
-        self.ax1.title.set_text("Universe viewport epoch {}".format(frame_n))
-        self.sim.run_step()
-        self.scat._offsets3d = self.sim.get_pos()
-        judgedMetrics = self.judger.judge()
-        hamiltions = judgedMetrics['hanmiltonian']
+    def __plot_metrics(self):
+        metrics = self.judger.metrics(self.sim.universe)
+        hamiltions = metrics['hanmiltonian']
         self.ax2.cla()
         self.ax2.set_title("Hamiltonian")
         potential = hamiltions['potential']
         kinetic = hamiltions['kinetic']
         HSum = hamiltions['sum']
-        self.ax2.plot(potential, color='red', label='potential')
-        self.ax2.plot(kinetic, color='green', label='kinetic')
+        # self.ax2.plot(potential, color='red', label='potential')
+        # self.ax2.plot(kinetic, color='green', label='kinetic')
         self.ax2.plot(HSum, color='blue', label='HSum')
         # self.ax2.plot(hamiltions)
 
-        angularmomentum = judgedMetrics['angularMomentum']
+        angularmomentum = metrics['angularMomentum']
         self.ax3.cla()
         self.ax3.set_title('Total angular momentum')
         self.ax3.plot(angularmomentum, color='red', label='x angular momentum')
-        
+
         #hamiltonian, angular_momentum = metrics(universe)
 
-    def simulate(self, n_steps=100, n_stars=10, integrator='euler'):
-        if integrator == 'leapfrog':
-            self.sim = SimRun(n_steps=n_steps, n_stars=n_stars, integrator=Leapfrog())
-        elif integrator == 'hermite':
-            self.sim = SimRun(n_steps=n_steps, n_stars=n_stars, integrator=Hermite())
-        else:
-            self.sim = SimRun(n_steps=n_steps, n_stars=n_stars)
-
-        xs, ys, zs = self.sim.get_pos()
-        self.judger = Judger(self.sim.universe)
-        self.scat = self.ax1.scatter(xs, ys, zs, c='y')
-
-        # Setup animation
-        anim = FuncAnimation(self.fig, self.__update, interval=1)
-        plt.show()
-
-    def replay(self, path):
-        self.sim = Player(path)
+    def __update(self, frame_n):
+        self.ax1.title.set_text("Universe viewport epoch {}".format(frame_n))
         self.sim.run_step()
         xs, ys, zs = self.sim.get_pos()
-        self.scat = self.ax1.scatter(xs, ys, zs, c='y')
+        self.stars.set_data([xs, ys])
+        self.stars.set_3d_properties(zs)
+        return self.stars,
+
+    def __init(self):
+        xs, ys, zs = self.sim.get_pos()
+        self.stars.set_data([xs, ys])
+        self.stars.set_3d_properties(zs)
+        return self.stars,
+
+    def simulate(self):
+        # xs, ys, zs = self.sim.get_pos()
+        # self.scat = self.ax1.scatter(xs, ys, zs, c='y')
+
         # Setup animation
-        anim = FuncAnimation(self.fig, self.__update, interval=50)
+        anim = FuncAnimation(self.fig, self.__update, interval=50,init_func=self.__init, blit=True)
         plt.show()
+
 
