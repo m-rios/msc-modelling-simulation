@@ -87,8 +87,10 @@ class Leapfrog(Integrator):
     
 
 class Hermite(Integrator):
+    __shadowUniverse = Universe(10)
     def __init__(self, dt: float = 1e-3, selector: sel.Selector = sel.AllSelector()):
         super().__init__(dt, selector)
+        self.__shadowUniverse = Universe(10)
 
     def do_step(self, uni:Universe):
         # old_pos = @pos  //(1)
@@ -102,22 +104,22 @@ class Hermite(Integrator):
         
 
         #recorde all the all values (1)
-        shadowUniverse = Universe(len(uni))
+        self.__shadowUniverse = Universe(len(uni))
         old_jerks = []
         for i in range(len(uni)):
             old_jerk = self.calculateJ(uni, i)
             old_jerks.append(old_jerk)
             i_star = uni.stars[i]
-            shadowStar = shadowUniverse.stars[i]
+            shadowStar = self.__shadowUniverse.stars[i]
             shadowStar['pos'] = copy.deepcopy(i_star['pos'])
             shadowStar['vel'] = copy.deepcopy(i_star['vel'])
             shadowStar['acc'] = copy.deepcopy(i_star['acc']) 
         
         #calculate the middle status (2)
         
-        for i in range(len(shadowUniverse)):
+        for i in range(len(self.__shadowUniverse)):
             i_star = uni.stars[i]
-            i_shadow_star = shadowUniverse.stars[i]
+            i_shadow_star = self.__shadowUniverse.stars[i]
             i_shadow_star_jerk = old_jerks[i]
             i_star['pos'] += i_shadow_star['vel'] * self.dt + i_shadow_star['acc'] * (pow(self.dt,2) / 2.0) + i_shadow_star_jerk * (pow(self.dt, 3) / 6.0)
             i_star['vel'] += i_shadow_star['acc'] * self.dt + i_shadow_star_jerk * (pow(self.dt, 2) / 2.0) 
@@ -142,7 +144,7 @@ class Hermite(Integrator):
         #calculate the final result (4)
         for i in range(len(uni)):
             i_star = uni.stars[i]
-            i_shadow_star = shadowUniverse.stars[i]
+            i_shadow_star = self.__shadowUniverse.stars[i]
             old_jerk = old_jerks[i]
             jerk = new_jerks[i]
             i_star['vel'] = i_shadow_star['vel'] + (i_shadow_star['acc'] + i_star['acc']) * (self.dt / 2.0) + (old_jerk - jerk) * (pow(self.dt,2) / 12.0)
