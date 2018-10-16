@@ -23,13 +23,13 @@ class MainWindow:
         self.ax1.set_facecolor((24/255, 24/255, 24/255))
         # self.ax1.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
 
-        # self.ax1.axis('off')
+        self.ax1.axis('off')
         self.ax1.set_title("Universe viewport", y=1.085)
         xs, ys, zs = self.sim.get_pos()
         self.stars, = self.ax1.plot(xs, ys, zs, 'oy', markersize=2)
-        self.x, = self.ax1.plot([0, 1], [0, 0], [0, 0], color='red')
-        self.y, = self.ax1.plot([0, 0], [0, 1], [0, 0], color='green')
-        self.z, = self.ax1.plot([0, 0], [0, 0], [0, 1], color='blue')
+        # self.x, = self.ax1.plot([0, 1], [0, 0], [0, 0], color='red')
+        # self.y, = self.ax1.plot([0, 0], [0, 1], [0, 0], color='green')
+        # self.z, = self.ax1.plot([0, 0], [0, 0], [0, 1], color='blue')
         # self.stars, = self.ax1.plot(xs, ys, 'oy')
 
         # Hamiltonian viewport configuration

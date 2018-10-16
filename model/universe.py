@@ -26,8 +26,8 @@ class Universe:
             # self.stars['mass'] = np.random.rand(n_stars)
 
             # self.add_galaxy(1e10, 3, 2, n_stars)
-            self.add_galaxy(self.mass, n_stars, [1, 0, 0], 0, [0, 3, 0])
-            self.add_galaxy(self.mass, n_stars, [1, 0, 0], 0, [0, -3, 0])
+            self.add_galaxy(self.mass, n_stars, [1, 0, 0], 0, [0, 0, 0])
+            # self.add_galaxy(self.mass, n_stars, [1, 0, 0], 0, [0, -3, 0])
 
     def add_galaxy(self, mass, n_stars, axis, theta, tras):
         tras = np.asarray(tras)

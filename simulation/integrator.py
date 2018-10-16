@@ -6,6 +6,7 @@ import simulation.selector as sel
 import numpy as np
 import copy
 
+
 class Integrator(ABC):
     # Abstract integrator class. All integrator methods must extend this class
 
@@ -13,6 +14,18 @@ class Integrator(ABC):
         assert isinstance(selector, sel.Selector) and isinstance(dt, float)
         self.dt = dt
         self.selector = selector
+
+    def acceleration(self, uni: Universe):
+        acc = np.zeros((len(uni), 3))
+        for i in range(len(uni)):
+            attractors = uni[self.selector.select(i, uni)]
+            i_star = uni[i]
+            # Compute accelerations
+            for j_star in attractors:
+                d = j_star['pos'] - i_star['pos']
+                acc[i, :] = acc[i, :] + j_star['mass'] * d / (np.linalg.norm(d) ** 3)
+        acc = cst.G * acc
+        return acc
 
     @abstractmethod
     def do_step(self, universe: Universe):
@@ -23,68 +36,27 @@ class Euler(Integrator):
     def __init__(self, dt: float = 1e-3, selector: sel.Selector = sel.AllSelector()):
         super().__init__(dt, selector)
 
-    def do_step2(self, uni: Universe):
-        assert isinstance(uni, Universe)
-
-        # Compute acceleration for each star in the universe
-        for i in range(len(uni)):
-            attractors = uni[self.selector.select(i, uni)]
-            i_star = np.repeat(uni[i], len(uni) - 1, axis=0)
-
-            d = attractors['pos'] - i_star['pos']
-            d = d/(norm(d, axis=0)**3)
-            acc = np.multiply(d, np.repeat(attractors['mass'], 3).reshape(len(attractors),3))
-            n_acc = np.sum(acc, axis=0)*cst.G
-
-            # Integrate acceleration and update new values
-            n_vel = uni[i]['vel'] + self.dt*n_acc
-            n_pos = uni[i]['pos'] + self.dt*n_vel
-
-            uni[i]['acc'] = n_acc
-            uni[i]['vel'] = n_vel
-            uni[i]['pos'] = n_pos
-
     def do_step(self, uni: Universe):
         assert isinstance(uni, Universe)
-        acc = np.zeros((len(uni), 3))
-        for i in range(len(uni)):
-            attractors = uni[self.selector.select(i, uni)]
-            i_star = uni[i]
-            for j_star in attractors:
-                d = j_star['pos'] - i_star['pos']
-                acc[i,:] = acc[i,:] + j_star['mass'] * d/(np.linalg.norm(d)**3)
-        acc = cst.G * acc
-        uni['vel'] = uni['vel'] + self.dt*acc
-        uni['pos'] = uni['pos'] + self.dt*uni['vel']
+        n_acc = self.acceleration(uni)
+        uni['vel'] = uni['vel'] + uni['acc'] * self.dt
+        uni['pos'] = uni['pos'] + uni['vel'] * self.dt
+        uni['acc'] = n_acc  # Update new acceleration
+
 
 class Leapfrog(Integrator):
     def __init__(self, dt: float = 1e-3, selector: sel.Selector = sel.AllSelector()):
         super().__init__(dt, selector)
+        print("Created Leapfrog Integrator")
     
-    def do_step( self, uni: Universe):
-
+    def do_step(self, uni: Universe):
         assert isinstance(uni, Universe)
-        for i in range(len(uni)):
-            star = uni.stars[i]
-            starhalfstep = star['pos'] + (self.dt * star['vel']) / 2
-            star['pos'] = starhalfstep
-        
-        for i in range(len(uni)):
-            n_acc = 0
-            i_star = uni.stars[i]
-            attracting_stars = uni[self.selector.select(i, uni)]
-            for j_star in attracting_stars:
-                d = i_star['pos'] - j_star['pos']
-                n_acc += cst.G * j_star['mass'] * d/norm(d)
-            
-            i_star['acc'] = n_acc
-        
+        n_acc = self.acceleration(uni)
+        # Update positions
+        uni['pos'] = uni['pos'] + uni['vel']*self.dt + 1/2 * (uni['acc']*self.dt**2)
+        uni['vel'] = uni['vel'] + 1/2 * (uni['acc'] + n_acc) * self.dt
+        uni['acc'] = n_acc
 
-        for i in range(len(uni)):
-            star = uni.stars[i]
-            star['vel'] = star['vel'] + self.dt * star['acc'] #get new vel
-            star['pos'] = star['pos'] + self.dt * star['vel'] / 2
-    
 
 class Hermite(Integrator):
     def __init__(self, dt: float = 1e-3, selector: sel.Selector = sel.AllSelector()):
@@ -109,9 +81,9 @@ class Hermite(Integrator):
             old_jerks.append(old_jerk)
             i_star = uni.stars[i]
             shadowStar = shadowUniverse.stars[i]
-            shadowStar['pos'] = copy.deepcopy(i_star['pos'])
-            shadowStar['vel'] = copy.deepcopy(i_star['vel'])
-            shadowStar['acc'] = copy.deepcopy(i_star['acc']) 
+            shadowStar['pos'] = i_star['pos']
+            shadowStar['vel'] = i_star['vel']
+            shadowStar['acc'] = i_star['acc']
         
         #calculate the middle status (2)
         

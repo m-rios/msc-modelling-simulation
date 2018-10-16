@@ -6,6 +6,7 @@ import config
 import os
 import pickle
 import numpy as np
+import copy
 
 
 class Simulator(ABC):
@@ -31,8 +32,10 @@ class Player(Simulator):
         try:
             self.universe = pickle.load(self.logfile)
             self.epoch += 1
+            return True
         except EOFError:
             print("Finished at step: {}".format(self.epoch))
+            return False
 
     def get_pos(self):
         return self.universe['pos'][:, 0], self.universe['pos'][:, 1], self.universe['pos'][:, 2]
@@ -48,6 +51,10 @@ class SimRun(Simulator):
 
         if universe is None:
             self.universe = Universe(n_stars=n_stars)
+            # Acceleration must be initialized to other than 0
+            # u2 = copy.deepcopy(self.universe)
+            # self.integrator.do_step(u2)
+            # self.universe['acc'] = u2['acc']
         else:
             assert isinstance(universe, Universe)
             self.universe = universe
@@ -64,6 +71,7 @@ class SimRun(Simulator):
     def _save(self):
         print("saving "+str(self.epoch))
         pickle.dump(self.universe, self.logfile)
+        self.logfile.flush()
 
     def run(self):
         # Initialize log file
@@ -82,7 +90,7 @@ class SimRun(Simulator):
     def __del__(self):
         self.logfile.flush()
         self.logfile.close()
-        print('SimRun died')
+        print('SimRun finished after {}'.format(self.epoch))
 
 
 if __name__ == '__main__':

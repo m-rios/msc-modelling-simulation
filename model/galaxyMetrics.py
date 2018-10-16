@@ -2,6 +2,7 @@ from . import Universe
 from . import constants 
 import numpy as np
 from numpy.linalg import norm
+from scipy.spatial.distance import squareform, pdist
 
 
 class Judger:
@@ -10,6 +11,7 @@ class Judger:
         self.judgedUniverse = judgedUniverse
         self.hamiltonians = {'U': [], 'T': [], 'H': []}
         self.angular_moms = []
+        self.min_distances = []
 
     def metrics(self, u: Universe):
         # u = self.judgedUniverse
@@ -33,70 +35,7 @@ class Judger:
         self.hamiltonians['H'].append(H)
         return self.hamiltonians, self.angular_moms
 
-    def judge(self, u: Universe):
-        self.judgedUniverse = u
-        # print('start!')
-        potentilEnergySum = 0
-        kineticEnergySum = 0
-        angularMomentumSum = [0,0,0]
-
-        for i in range(len(self.judgedUniverse.stars)):
-            currentStart = self.judgedUniverse.stars[i]
-            pos = currentStart['pos']
-            mass = currentStart['mass']
-            vel = currentStart['vel']
-
-            momentum = mass * vel
-            kineticEnergy = np.dot(momentum, momentum)/(2 * mass)
-            kineticEnergySum += kineticEnergy
-
-
-            angularMomentum = np.cross(pos, momentum)
-            angularMomentumSum += angularMomentum
-
-            for j in range(len(self.judgedUniverse.stars)):
-                jStar = self.judgedUniverse.stars[j]
-                jPos = jStar['pos']
-                jMass = jStar['mass']
-
-                if i != j:
-                    U = constants.G * mass * jMass / norm(jPos - pos)
-                    potentilEnergySum -= U
-
-        # self.hamiltionians.append(H)
-        potential = self.hamiltonians['U']
-        potential.append(potentilEnergySum)
-        kinetic = self.hamiltonians['T']
-        kinetic.append(kineticEnergySum)
-        HEnergy = self.hamiltonians['H']
-        HEnergy.append(potentilEnergySum + kineticEnergySum)
-
-
-        # xes = self.angularMomentSums['xes']
-        # xes.append(angularMomentumSum[0])
-        # ys = self.angularMomentSums['ys']
-        # ys.append(angularMomentumSum[1])
-        # zes = self.angularMomentSums['zes']
-        # zes.append(angularMomentumSum[2]
-        self.angular_moms.append(norm(angularMomentumSum))
-        return self.hamiltonians, self.angular_moms
-
-    def judge2(self, u: Universe):
-        # print('start!')
-        angularMomentumSum = [0,0,0]
-
-        for i in range(len(u)):
-            currentStart =  u[i]
-            pos = currentStart['pos']
-            mass = currentStart['mass']
-            vel = currentStart['vel']
-
-            momentum = vel * mass
-            angularMomentum = np.cross(pos, momentum)
-            angularMomentumSum += angularMomentum
-
-        self.angular_moms.append(norm(angularMomentumSum))
-        print(norm(angularMomentumSum))
-        return self.hamiltonians, self.angular_moms
-
-
+    def min_dist(self, u: Universe):
+        d = np.min(pdist(u['pos']))
+        self.min_distances.append(d)
+        return self.min_distances
