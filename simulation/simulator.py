@@ -52,10 +52,6 @@ class SimRun(Simulator):
 
         if universe is None:
             self.universe = Universe(n_stars=n_stars)
-            # Acceleration must be initialized to other than 0
-            # u2 = copy.deepcopy(self.universe)
-            # self.integrator.do_step(u2)
-            # self.universe['acc'] = u2['acc']
         else:
             assert isinstance(universe, Universe)
             self.universe = universe
