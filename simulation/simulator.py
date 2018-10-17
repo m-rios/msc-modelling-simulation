@@ -7,6 +7,7 @@ import os
 import pickle
 import numpy as np
 import copy
+import time
 
 
 class Simulator(ABC):
@@ -70,6 +71,7 @@ class SimRun(Simulator):
 
     def _save(self):
         print("saving "+str(self.epoch))
+        print(time.time())
         pickle.dump(self.universe, self.logfile)
         self.logfile.flush()
 
