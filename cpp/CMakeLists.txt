@@ -27,6 +27,7 @@ if(APPLE)
 endif()
 
 find_package(OpenMP)
+find_package(Boost)
 
 if (OPENMP_FOUND)
     include_directories("${OPENMP_INCLUDES}")
@@ -43,5 +44,5 @@ if(OPENMP_FOUND)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif(OPENMP_FOUND)
 
-include_directories(Eigen)
+include_directories(Eigen ${Boost_INCLUDE_DIRS})
 add_executable(cpp main.cpp)

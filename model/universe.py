@@ -1,6 +1,7 @@
 import numpy as np
 from galpy.df import dehnendf
 import math
+import sys
 
 
 class Universe:
@@ -94,3 +95,16 @@ class Universe:
                          [2 * (bc - ad), aa + cc - bb - dd, 2 * (cd + ab)],
                          [2 * (bd + ac), 2 * (cd - ab), aa + dd - bb - cc]])
 
+
+if __name__ == '__main__':
+    args = sys.argv
+    assert len(args) == 3, "Usage: universe n_stars mass"
+    # Export universe to csv
+    u = Universe(n_stars=int(args[1]), mass=float(args[2]))
+    stars = []
+    for star in u:
+        fields = [str(p) for p in star['pos']] + [str(v) for v in star['vel']] + [str(star['mass'])]
+        stars.append(','.join(fields))
+    content = '\n'.join(stars)
+    with open('universe.csv', 'w') as f:
+        f.write(content)
