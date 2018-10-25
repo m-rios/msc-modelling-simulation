@@ -1,6 +1,7 @@
 import numpy as np
 from galpy.df import dehnendf
 import math
+import random
 
 
 class Universe:
@@ -35,6 +36,7 @@ class Universe:
         dfc = dehnendf(beta=0.)
         o = dfc.sample(n=n_stars, returnOrbit=True)
         stars = np.zeros(n_stars, dtype=self.__star_fields)
+        mass = random.randint(1e2, 1e10)
         for idx in range(len(stars)):
             stars['pos'][idx, 0:2] = [o[idx].x(), o[idx].y()]
             stars['mass'][idx] = mass

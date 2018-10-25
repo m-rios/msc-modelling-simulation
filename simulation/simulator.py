@@ -8,6 +8,7 @@ import pickle
 import numpy as np
 import copy
 import time
+import results
 
 
 class Simulator(ABC):
@@ -25,6 +26,7 @@ class Simulator(ABC):
 
 class Player(Simulator):
     def __init__(self, path: str):
+        print (path)
         self.logfile = open(path, 'rb')
         self.universe = pickle.load(self.logfile)
         self.epoch = 0
@@ -66,7 +68,7 @@ class SimRun(Simulator):
         self.history = []
 
     def _save(self):
-        print("saving "+str(self.epoch))
+        print("saving "+str(self.epoch) + self.integrator.name)
         print(time.time())
         pickle.dump(self.universe, self.logfile)
         self.logfile.flush()

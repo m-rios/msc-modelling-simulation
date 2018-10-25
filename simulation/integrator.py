@@ -14,6 +14,7 @@ class Integrator(ABC):
         assert isinstance(selector, sel.Selector) and isinstance(dt, float)
         self.dt = dt
         self.selector = selector
+        self.name = ''
 
     def acceleration(self, uni: Universe):
         acc = np.zeros((len(uni), 3))
@@ -35,6 +36,7 @@ class Integrator(ABC):
 class Euler(Integrator):
     def __init__(self, dt: float = 1e-3, selector: sel.Selector = sel.AllSelector()):
         super().__init__(dt, selector)
+        self.name = 'euler'
 
     def do_step(self, uni: Universe):
         assert isinstance(uni, Universe)
@@ -48,6 +50,7 @@ class Leapfrog(Integrator):
     def __init__(self, dt: float = 1e-3, selector: sel.Selector = sel.AllSelector()):
         super().__init__(dt, selector)
         print("Created Leapfrog Integrator")
+        self.name = 'leapfrog'
 
     def do_step(self, uni: Universe):
         assert isinstance(uni, Universe)
@@ -62,6 +65,7 @@ class Hermite(Integrator):
     __shadowUniverse = Universe(10)
     def __init__(self, dt: float = 1e-3, selector: sel.Selector = sel.AllSelector()):
         super().__init__(dt, selector)
+        self.name = 'hermite'
         self.__shadowUniverse = Universe(10)
 
     def do_step(self, uni:Universe):
